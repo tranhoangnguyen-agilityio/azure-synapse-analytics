@@ -1,0 +1,18 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"value": "collectiv"
+		},
+		"collectiv-WorkspaceDefaultSqlServer_connectionString": {
+			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:collectiv.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
+		},
+		"serverlessSQLdb_connectionString": {
+			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=collectiv-ondemand.sql.azuresynapse.net;Initial Catalog=r-collectiv-gold-db"
+		},
+		"collectiv-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"value": "https://collectiv2410.dfs.core.windows.net"
+		}
+	}
+}
