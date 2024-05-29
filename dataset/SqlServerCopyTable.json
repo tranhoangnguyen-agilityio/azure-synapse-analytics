@@ -1,0 +1,13 @@
+{
+	"name": "SqlServerCopyTable",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "FreeAzureAdventureWorksSqlServer1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

@@ -1,0 +1,9 @@
+{
+	"name": "r-collectiv-df",
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "4bd5fd3a-e0c2-4a10-a9dc-c54d36bb9384",
+		"tenantId": "ed798ab6-977a-45b2-9491-df48f9f91859"
+	}
+}
