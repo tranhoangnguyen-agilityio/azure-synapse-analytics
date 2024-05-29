@@ -5,11 +5,26 @@
 		"workspaceName": {
 			"value": "collectiv"
 		},
+		"AzureBlobStorage1_connectionString": {
+			"value": ""
+		},
+		"AzureDataLakeStorage1_accountKey": {
+			"value": ""
+		},
+		"FreeAzureAdventureWorksSqlServer1_connectionString": {
+			"value": ""
+		},
 		"collectiv-WorkspaceDefaultSqlServer_connectionString": {
 			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:collectiv.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
 		},
 		"serverlessSQLdb_connectionString": {
 			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=collectiv-ondemand.sql.azuresynapse.net;Initial Catalog=r-collectiv-gold-db"
+		},
+		"AzureDataLakeStorage1_properties_typeProperties_url": {
+			"value": "https://collectiv2410.dfs.core.windows.net/"
+		},
+		"AzureKeyVault1_properties_typeProperties_baseUrl": {
+			"value": "https://r-collectiv-app.vault.azure.net/"
 		},
 		"collectiv-WorkspaceDefaultStorage_properties_typeProperties_url": {
 			"value": "https://collectiv2410.dfs.core.windows.net"
