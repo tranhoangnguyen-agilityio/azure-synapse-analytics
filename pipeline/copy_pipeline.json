@@ -32,19 +32,7 @@
 						}
 					},
 					"enableStaging": false
-				},
-				"inputs": [
-					{
-						"referenceName": "SalesOrdersDataset",
-						"type": "DatasetReference"
-					}
-				],
-				"outputs": [
-					{
-						"referenceName": "SalesOrdersDatasetOutput",
-						"type": "DatasetReference"
-					}
-				]
+				}
 			}
 		],
 		"annotations": [],
