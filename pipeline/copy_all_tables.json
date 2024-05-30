@@ -29,7 +29,7 @@
 				}
 			},
 			{
-				"name": "ForEach1",
+				"name": "ForEachTest",
 				"type": "ForEach",
 				"dependsOn": [
 					{
@@ -141,7 +141,7 @@
 				"type": "DatabricksNotebook",
 				"dependsOn": [
 					{
-						"activity": "ForEach1",
+						"activity": "ForEachTest",
 						"dependencyConditions": [
 							"Succeeded"
 						]
