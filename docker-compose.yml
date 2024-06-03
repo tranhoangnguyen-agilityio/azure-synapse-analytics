@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  validateTemplate:
+    image: mcr.microsoft.com/powershell:lts-ubuntu-22.04
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - '5434:5434'
+    volumes: 
+      - db:/var/lib/postgresql/data
+volumes:
+  db:
+    driver: local

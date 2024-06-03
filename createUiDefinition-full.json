@@ -1,0 +1,61 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+    "handler": "Microsoft.Azure.CreateUIDef",
+    "version": "0.1.2-preview",
+    "parameters": {
+        "basics": [
+            {}
+        ],
+        "steps": [
+			{
+                "name": "synapseSetting",
+                "label": "Synapse Workspace",
+                "bladeTitle": "Synapse credentials",
+                "subLabel": {
+                    "preValidation": "Provide Synapase's setting",
+                    "postValidation": "Great - let's move on!"
+                },
+                "elements": [
+					{
+						"name": "workspaceName",
+						"type": "Microsoft.Common.TextBox",
+						"label": "Synapse workspace name",
+						"placeholder": "",
+						"defaultValue": "",
+						"toolTip": "Use only allowed characters",
+						"constraints": {
+							"required": true,
+							"regex": "^[a-z0-9A-Z]{1,30}$",
+							"validationMessage": "Only alphanumeric characters are allowed, and the value must be 1-30 characters long."
+						},
+						"visible": true
+					},
+					{
+						"name": "storageAccountSelector1",
+						"type": "Microsoft.Storage.StorageAccountSelector",
+						"label": "Storage account",
+						"toolTip": "",
+						"defaultValue": {
+							"name": "storageaccount01",
+							"type": "Premium_LRS"
+						},
+						"constraints": {
+							"allowedTypes": [],
+							"excludedTypes": []
+						},
+						"options": {
+							"hideExisting": false
+						},
+						"visible": true
+					}
+                ]
+            }
+        ],
+		"outputs":{
+			"workspaceName": "[steps('synapseSetting').workspaceName]",
+			"collectiv-WorkspaceDefaultSqlServer_connectionString": "[concat('Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:', steps('synapseSetting').workspaceName, '.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}')]",
+			"serverlessSQLdb_connectionString": "[concat('Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=', steps('synapseSetting').workspaceName, '-ondemand.sql.azuresynapse.net;Initial Catalog=', steps('synapseSetting').workspaceName, '-gold-db')]",
+			"collectiv-WorkspaceDefaultStorage_properties_typeProperties_url": "[concat('https://', steps('synapseSetting').storageAccountSelector1.name, '.dfs.core.windows.net')]"
+		}
+    }
+}
