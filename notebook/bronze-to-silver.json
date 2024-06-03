@@ -1,5 +1,5 @@
 {
-	"name": "Notebook 1",
+	"name": "bronze-to-silver",
 	"properties": {
 		"nbformat": 4,
 		"nbformat_minor": 2,
@@ -13,7 +13,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "225ca82e-98c2-46bb-9c0a-cf9bbb75d42b"
+				"spark.autotune.trackingId": "6ba51d55-a259-4c9e-8810-d17208452165"
 			}
 		},
 		"metadata": {
