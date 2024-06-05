@@ -8,6 +8,57 @@
         ],
         "steps": [
             {
+                "name": "dataSourceSetting",
+                "label": "SQL Server Data source setting",
+                "elements": [
+                    {
+                        "name": "serverName",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Server name",
+                        "placeholder": "Server name",
+                        "defaultValue": "sqlservercentralpublic.database.windows.net",
+                        "constraints": {
+                            "required": true
+                        },
+                        "visible": true
+                    },
+                    {
+                        "name": "databaseName",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Database name",
+                        "placeholder": "Database name",
+                        "defaultValue": "AdventureWorks",
+                        "constraints": {
+                            "required": true
+                        },
+                        "visible": true
+                    },
+                    {
+                        "name": "userName",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "User name",
+                        "placeholder": "User name",
+                        "defaultValue": "sqlfamily",
+                        "constraints": {
+                            "required": true
+                        },
+                        "visible": true
+                    },
+                    {
+                        "name": "password",
+                        "type": "Microsoft.Common.PasswordBox",
+                        "options": {
+                            "hideConfirmation": true
+                        },
+                        "constraints": {
+                            "required": true
+                        },
+                        "visible": true
+                    }
+
+                ]
+            },
+            {
                 "name": "synapseSetting",
                 "label": "Synapse Workspace",
                 "bladeTitle": "Synapse credentials",
@@ -55,12 +106,14 @@
         ],
         "outputs": {
             "location": "[location()]",
-            "synapseWorkspaceName": "[steps('synapseSetting').workspaceName]",
+            "workspaceName": "[steps('synapseSetting').workspaceName]",
             "collectiv-WorkspaceDefaultSqlServer_connectionString": "[concat('Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:', steps('synapseSetting').workspaceName, '.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}')]",
             "serverlessSQLdb_connectionString": "[concat('Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=', steps('synapseSetting').workspaceName, '-ondemand.sql.azuresynapse.net;Initial Catalog=', steps('synapseSetting').workspaceName, '-gold-db')]",
-            "storageAccountName": "[concat('https://', steps('synapseSetting').storageAccounts.prefix, '1' ,'.dfs.core.windows.net')]",
-            "storageResourceGroup": "[steps('synapseSetting').storageAccounts.resourceGroup]",
-            "storageAccountNewOrExisting":  "[steps('synapseSetting').storageAccounts.newOrExisting]"
+            "dataSource_serverName": "[steps('dataSourceSetting').serverName]",
+            "dataSource_userName": "[steps('dataSourceSetting').userName]",
+            "dataSource_password": "[steps('dataSourceSetting').password]",
+            "dataSource_databaseName": "[steps('dataSourceSetting').databaseName]",
+            "storageAccountName": "[concat('https://', steps('synapseSetting').storageAccounts.prefix, '1' ,'.dfs.core.windows.net')]"
         }
     }
 }

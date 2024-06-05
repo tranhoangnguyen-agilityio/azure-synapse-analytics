@@ -5,23 +5,29 @@
         "location": {
             "value": "eastus"
         },
-        "synapseWorkspaceName": {
-            "value": "collectiv"
+        "workspaceName": {
+            "value": "localworkspace"
         },
         "storageAccountName": {
-            "value": "collectivdemo2410"
+            "value": "localcollectiv"
         },
         "collectiv-WorkspaceDefaultSqlServer_connectionString": {
-            "value": "TBD"
+            "value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:localworkspace.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
         },
         "serverlessSQLdb_connectionString": {
-            "value": "TBD"
+            "value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=localworkspace-ondemand.sql.azuresynapse.net;Initial Catalog=localworkspace-gold-db"
         },
-        "storageResourceGroup": {
-            "value": "test-deployment"
+        "dataSource_serverName": {
+            "value": "sqlservercentralpublic.database.windows.net"
         },
-        "storageAccountNewOrExisting": {
-            "value": "new"
+        "dataSource_userName": {
+            "value": "sqlfamily"
+        },
+        "dataSource_password": {
+            "value": "sqlf@m1ly"
+        },
+        "dataSource_databaseName": {
+            "value": "AdventureWorks"
         }
     }
 }

@@ -5,26 +5,46 @@
         "location": {
             "type": "String"
         },
-        "synapseWorkspaceName": {
+        "dataSource_serverName": {
             "type": "String"
+        },
+        "dataSource_userName": {
+            "type": "String"
+        },
+        "dataSource_password": {
+            "type": "secureString"
+        },
+        "dataSource_databaseName": {
+            "type": "String"
+        },
+        "collectiv-WorkspaceDefaultSqlServer_connectionString": {
+            "type": "secureString",
+            "metadata": "Secure string for 'connectionString' of 'collectiv-WorkspaceDefaultSqlServer'"
+        },
+        "serverlessSQLdb_connectionString": {
+            "type": "secureString",
+            "metadata": "Secure string for 'connectionString' of 'serverlessSQLdb'"
+        },
+        "workspaceName": {
+            "type": "String",
+            "metadata": "Synapse workspace name"
         },
         "storageAccountName": {
             "type": "String"
         },
-        "collectiv-WorkspaceDefaultSqlServer_connectionString": {
-            "type": "String"
-        },
-        "serverlessSQLdb_connectionString": {
-            "type": "String"
-        },
-        "storageResourceGroup": {
-            "type": "String"
-        },
-        "storageAccountNewOrExisting": {
-            "type": "String"
+        "vulnerabilityAssessmentContainer": {
+            "type": "String",
+            "metadata": "A blob storage container path to hold the scan results",
+            "defaultValue": "vascans"
         }
     },
-    "variables": {},
+    "variables": {
+        "workspaceId": "[concat('Microsoft.Synapse/workspaces/', parameters('workspaceName'))]",
+        "collectiv-WorkspaceDefaultStorage_properties_typeProperties_url": "[format('https://{0}.dfs.core.windows.net', parameters('storageAccountName'))]",
+        "FreeAzureAdventureWorksSqlServer1_connectionString": "[format('Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source={0};Initial Catalog={1};User Id={2},Password={3}', parameters('dataSource_serverName'), parameters('dataSource_databaseName'), parameters('dataSource_userName'), parameters('dataSource_password'))]",
+        "storageAccounts_collectiv2410_externalid": "[extensionResourceId(resourceGroup().Id , 'Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]",
+        "vulnerabilityAssessments_Default_storageContainerPath": "[format('https://{0}.dfs.core.windows.net/{1}', parameters('storageAccountName'), parameters('vulnerabilityAssessmentContainer'), '/')]"
+    },
     "resources": [
         {
             "type": "Microsoft.Storage/storageAccounts",
@@ -188,6 +208,697 @@
                 "denyEncryptionScopeOverride": false,
                 "publicAccess": "None"
             }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2023-04-01",
+            "name": "[concat(parameters('storageAccountName'), '/default/', parameters('vulnerabilityAssessmentContainer'))]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccountName'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+            ],
+            "properties": {
+                "defaultEncryptionScope": "$account-encryption-key",
+                "denyEncryptionScopeOverride": false,
+                "publicAccess": "None"
+            }
+        },
+        {
+            "type": "Microsoft.Synapse/workspaces",
+            "apiVersion": "2021-06-01",
+            "name": "[parameters('workspaceName')]",
+            "location": "eastus",
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "properties": {
+                "defaultDataLakeStorage": {
+                    "resourceId": "[variables('storageAccounts_collectiv2410_externalid')]",
+                    "createManagedPrivateEndpoint": false,
+                    "accountUrl": "[concat('https://', parameters('storageAccountName'), 'dfs.core.windows.net')]",
+                    "filesystem": "[parameters('workspaceName')]"
+                },
+                "encryption": {},
+                "managedResourceGroupName": "synapseworkspace-managedrg-4b93015f-bce7-48e1-942d-9f8fb9a4912a",
+                "sqlAdministratorLogin": "sqladminuser",
+                "privateEndpointConnections": [],
+                "publicNetworkAccess": "Enabled",
+                "cspWorkspaceAdminProperties": {
+                    "initialWorkspaceAdminObjectId": "e7f32d66-8cf3-4609-a6b6-6105765a8ee8"
+                },
+                "azureADOnlyAuthentication": false,
+                "trustedServiceBypassEnabled": false
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Synapse/workspaces/auditingSettings",
+            "apiVersion": "2021-06-01",
+            "name": "[concat(parameters('workspaceName'), '/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Synapse/workspaces', parameters('workspaceName'))]"
+            ],
+            "properties": {
+                "retentionDays": 0,
+                "auditActionsAndGroups": [],
+                "isStorageSecondaryKeyInUse": false,
+                "isAzureMonitorTargetEnabled": false,
+                "state": "Disabled",
+                "storageAccountSubscriptionId": "00000000-0000-0000-0000-000000000000"
+            }
+        },
+        {
+            "type": "Microsoft.Synapse/workspaces/azureADOnlyAuthentications",
+            "apiVersion": "2021-06-01",
+            "name": "[concat(parameters('workspaceName'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Synapse/workspaces', parameters('workspaceName'))]"
+            ],
+            "properties": {
+                "azureADOnlyAuthentication": false
+            }
+        },
+        {
+            "name": "[concat(parameters('workspaceName'), '/collectivspark')]",
+            "type": "Microsoft.Synapse/workspaces/bigDataPools",
+            "apiVersion": "2019-06-01-preview",
+            "properties": {
+                "autoPause": {
+                    "enabled": true,
+                    "delayInMinutes": 15
+                },
+                "autoScale": {
+                    "enabled": false,
+                    "maxNodeCount": 10,
+                    "minNodeCount": 3
+                },
+                "nodeCount": 3,
+                "nodeSize": "Small",
+                "nodeSizeFamily": "MemoryOptimized",
+                "sparkVersion": "3.4",
+                "isComputeIsolationEnabled": false,
+                "sessionLevelPackagesEnabled": false,
+                "annotations": []
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Synapse/workspaces', parameters('workspaceName'))]"
+            ],
+            "location": "[parameters('location')]"
+        },
+        {
+            "type": "Microsoft.Synapse/workspaces/dedicatedSQLminimalTlsSettings",
+            "apiVersion": "2021-06-01",
+            "name": "[concat(parameters('workspaceName'), '/default')]",
+            "location": "eastus",
+            "dependsOn": [
+                "[resourceId('Microsoft.Synapse/workspaces', parameters('workspaceName'))]"
+            ],
+            "properties": {
+                "minimalTlsVersion": "1.2"
+            }
+        },
+        {
+            "type": "Microsoft.Synapse/workspaces/extendedAuditingSettings",
+            "apiVersion": "2021-06-01",
+            "name": "[concat(parameters('workspaceName'), '/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Synapse/workspaces', parameters('workspaceName'))]"
+            ],
+            "properties": {
+                "retentionDays": 0,
+                "auditActionsAndGroups": [],
+                "isStorageSecondaryKeyInUse": false,
+                "isAzureMonitorTargetEnabled": false,
+                "state": "Disabled",
+                "storageAccountSubscriptionId": "00000000-0000-0000-0000-000000000000"
+            }
+        },
+        {
+            "type": "Microsoft.Synapse/workspaces/firewallRules",
+            "apiVersion": "2021-06-01",
+            "name": "[concat(parameters('workspaceName'), '/allowAll')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Synapse/workspaces', parameters('workspaceName'))]"
+            ],
+            "properties": {
+                "startIpAddress": "0.0.0.0",
+                "endIpAddress": "255.255.255.255"
+            }
+        },
+        {
+            "type": "Microsoft.Synapse/workspaces/integrationruntimes",
+            "apiVersion": "2021-06-01",
+            "name": "[concat(parameters('workspaceName'), '/AutoResolveIntegrationRuntime')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Synapse/workspaces', parameters('workspaceName'))]"
+            ],
+            "properties": {
+                "type": "Managed",
+                "typeProperties": {
+                    "computeProperties": {
+                        "location": "AutoResolve"
+                    }
+                }
+            }
+        },
+        {
+            "name": "[concat(parameters('workspaceName'), '/Create view')]",
+            "type": "Microsoft.Synapse/workspaces/pipelines",
+            "apiVersion": "2019-06-01-preview",
+            "properties": {
+                "activities": [
+                    {
+                        "name": "Get TableNames",
+                        "type": "GetMetadata",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "0.12:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "dataset": {
+                                "referenceName": "goldtables",
+                                "type": "DatasetReference",
+                                "parameters": {}
+                            },
+                            "fieldList": [
+                                "childItems"
+                            ],
+                            "storeSettings": {
+                                "type": "AzureBlobFSReadSettings",
+                                "recursive": true,
+                                "enablePartitionDiscovery": false
+                            },
+                            "formatSettings": {
+                                "type": "BinaryReadSettings"
+                            }
+                        }
+                    },
+                    {
+                        "name": "ForEach1",
+                        "type": "ForEach",
+                        "dependsOn": [
+                            {
+                                "activity": "Get TableNames",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "userProperties": [],
+                        "typeProperties": {
+                            "items": {
+                                "value": "@activity('Get TableNames').output.childItems",
+                                "type": "Expression"
+                            },
+                            "activities": [
+                                {
+                                    "name": "Stored procedure1",
+                                    "type": "SqlServerStoredProcedure",
+                                    "dependsOn": [],
+                                    "policy": {
+                                        "timeout": "0.12:00:00",
+                                        "retry": 0,
+                                        "retryIntervalInSeconds": 30,
+                                        "secureOutput": false,
+                                        "secureInput": false
+                                    },
+                                    "userProperties": [],
+                                    "typeProperties": {
+                                        "storedProcedureName": "[concat('[dbo].[CreateSQLServerlessView_gold]')",
+                                        "storedProcedureParameters": {
+                                            "viewName": {
+                                                "value": {
+                                                    "value": "@item().name",
+                                                    "type": "Expression"
+                                                },
+                                                "type": "String"
+                                            }
+                                        }
+                                    },
+                                    "linkedServiceName": {
+                                        "referenceName": "serverlessSQLdb",
+                                        "type": "LinkedServiceReference"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "policy": {
+                    "elapsedTimeMetric": {}
+                },
+                "annotations": [],
+                "lastPublishTime": "2024-05-29T09:17:45Z"
+            },
+            "dependsOn": [
+                "[concat(variables('workspaceId'), '/datasets/goldtables')]",
+                "[concat(variables('workspaceId'), '/linkedServices/serverlessSQLdb')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('workspaceName'), '/goldtables')]",
+            "type": "Microsoft.Synapse/workspaces/datasets",
+            "apiVersion": "2019-06-01-preview",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "collectiv-WorkspaceDefaultStorage",
+                    "type": "LinkedServiceReference"
+                },
+                "annotations": [],
+                "type": "Binary",
+                "typeProperties": {
+                    "location": {
+                        "type": "AzureBlobFSLocation",
+                        "folderPath": "SalesLT",
+                        "fileSystem": "gold"
+                    }
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('workspaceId'), '/linkedServices/collectiv-WorkspaceDefaultStorage')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('workspaceName'), '/parquetTables')]",
+            "type": "Microsoft.Synapse/workspaces/datasets",
+            "apiVersion": "2019-06-01-preview",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "collectiv-WorkspaceDefaultStorage",
+                    "type": "LinkedServiceReference"
+                },
+                "parameters": {
+                    "schemaname": {
+                        "type": "string"
+                    },
+                    "tablename": {
+                        "type": "string"
+                    }
+                },
+                "annotations": [],
+                "type": "Parquet",
+                "typeProperties": {
+                    "location": {
+                        "type": "AzureBlobFSLocation",
+                        "fileName": {
+                            "value": "@concat(dataset().tablename, '.parquet')",
+                            "type": "Expression"
+                        },
+                        "folderPath": {
+                            "value": "@concat(dataset().schemaname, '/', dataset().tablename)",
+                            "type": "Expression"
+                        },
+                        "fileSystem": "bronze"
+                    },
+                    "compressionCodec": "snappy"
+                },
+                "schema": [
+                    {
+                        "name": "AddressID",
+                        "type": "INT32"
+                    },
+                    {
+                        "name": "AddressLine1",
+                        "type": "UTF8"
+                    },
+                    {
+                        "name": "AddressLine2",
+                        "type": "UTF8"
+                    },
+                    {
+                        "name": "City",
+                        "type": "UTF8"
+                    },
+                    {
+                        "name": "StateProvince",
+                        "type": "UTF8"
+                    },
+                    {
+                        "name": "CountryRegion",
+                        "type": "UTF8"
+                    },
+                    {
+                        "name": "PostalCode",
+                        "type": "UTF8"
+                    },
+                    {
+                        "name": "rowguid",
+                        "type": "UTF8"
+                    },
+                    {
+                        "name": "ModifiedDate",
+                        "type": "INT96"
+                    }
+                ]
+            },
+            "dependsOn": [
+                "[concat(variables('workspaceId'), '/linkedServices/collectiv-WorkspaceDefaultStorage')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('workspaceName'), '/FreeAzureAdventureWorksSqlServer1')]",
+            "type": "Microsoft.Synapse/workspaces/linkedServices",
+            "apiVersion": "2019-06-01-preview",
+            "properties": {
+                "description": "Link to free Azure Adventure Works",
+                "annotations": [],
+                "type": "SqlServer",
+                "typeProperties": {
+                    "connectionString": "[variables('FreeAzureAdventureWorksSqlServer1_connectionString')]"
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Synapse/workspaces', parameters('workspaceName'))]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('workspaceName'), '/collectiv-WorkspaceDefaultSqlServer')]",
+            "type": "Microsoft.Synapse/workspaces/linkedServices",
+            "apiVersion": "2019-06-01-preview",
+            "properties": {
+                "parameters": {
+                    "DBName": {
+                        "type": "String"
+                    }
+                },
+                "annotations": [],
+                "type": "AzureSqlDW",
+                "typeProperties": {
+                    "connectionString": "[parameters('collectiv-WorkspaceDefaultSqlServer_connectionString')]"
+                },
+                "connectVia": {
+                    "referenceName": "AutoResolveIntegrationRuntime",
+                    "type": "IntegrationRuntimeReference"
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('workspaceName'), '/collectiv-WorkspaceDefaultStorage')]",
+            "type": "Microsoft.Synapse/workspaces/linkedServices",
+            "apiVersion": "2019-06-01-preview",
+            "properties": {
+                "annotations": [],
+                "type": "AzureBlobFS",
+                "typeProperties": {
+                    "url": "[variables('collectiv-WorkspaceDefaultStorage_properties_typeProperties_url')]"
+                },
+                "connectVia": {
+                    "referenceName": "AutoResolveIntegrationRuntime",
+                    "type": "IntegrationRuntimeReference"
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('workspaceName'), '/serverlessSQLdb')]",
+            "type": "Microsoft.Synapse/workspaces/linkedServices",
+            "apiVersion": "2019-06-01-preview",
+            "properties": {
+                "annotations": [],
+                "type": "AzureSqlDatabase",
+                "typeProperties": {
+                    "connectionString": "[parameters('serverlessSQLdb_connectionString')]"
+                },
+                "connectVia": {
+                    "referenceName": "AutoResolveIntegrationRuntime",
+                    "type": "IntegrationRuntimeReference"
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('workspaceName'), '/WorkspaceSystemIdentity')]",
+            "type": "Microsoft.Synapse/workspaces/credentials",
+            "apiVersion": "2019-06-01-preview",
+            "properties": {
+                "type": "ManagedIdentity",
+                "typeProperties": {}
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Synapse/workspaces', parameters('workspaceName'))]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('workspaceName'), '/Create View Store Procedure')]",
+            "type": "Microsoft.Synapse/workspaces/sqlscripts",
+            "apiVersion": "2019-06-01-preview",
+            "properties": {
+                "content": {
+                    "query": "\n\nCREATE OR ALTER PROC CreateSQLServerlessView_gold @viewName NVARCHAR(100)\nAS\nBEGIN\n\nDECLARE @statement VARCHAR(MAX)\n\nSET @statement = N'CREATE OR ALTER VIEW ' + @viewName + ' AS\n    SELECT *\n    FROM\n        OPENROWSET(\n        BULK ''https://collectiv2410.dfs.core.windows.net/gold/SalesLT/' + @viewName + '/'',\n        FORMAT = ''DELTA''\n    ) AS [result]  \n'\n\nEXEC (@statement)\n\nEND\nGO",
+                    "metadata": {
+                        "language": "sql"
+                    },
+                    "currentConnection": {
+                        "databaseName": "r-collectiv-gold-db",
+                        "poolName": "Built-in"
+                    },
+                    "resultLimit": 5000
+                },
+                "type": "SqlQuery"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Synapse/workspaces', parameters('workspaceName'))]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('workspaceName'), '/copy_all_tables')]",
+            "type": "Microsoft.Synapse/workspaces/pipelines",
+            "apiVersion": "2019-06-01-preview",
+            "properties": {
+                "activities": [
+                    {
+                        "name": "Look for all tables",
+                        "type": "Lookup",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "0.12:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "source": {
+                                "type": "SqlServerSource",
+                                "sqlReaderQuery": "SELECT\ns.name AS SchemaName,\nt.name AS TableName\nFROM sys.tables t\nINNER JOIN sys.schemas s\nON t.schema_id = s.schema_id\nWHERE s.name = 'SalesLT' and t.name != 'Logger'",
+                                "queryTimeout": "02:00:00",
+                                "partitionOption": "None"
+                            },
+                            "dataset": {
+                                "referenceName": "SqlDBTables",
+                                "type": "DatasetReference",
+                                "parameters": {}
+                            },
+                            "firstRowOnly": false
+                        }
+                    },
+                    {
+                        "name": "ForEach Schema Table",
+                        "type": "ForEach",
+                        "dependsOn": [
+                            {
+                                "activity": "Look for all tables",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "userProperties": [],
+                        "typeProperties": {
+                            "items": {
+                                "value": "@activity('Look for all tables').output.value",
+                                "type": "Expression"
+                            },
+                            "activities": [
+                                {
+                                    "name": "Copy Each Table",
+                                    "type": "Copy",
+                                    "dependsOn": [],
+                                    "policy": {
+                                        "timeout": "0.12:00:00",
+                                        "retry": 0,
+                                        "retryIntervalInSeconds": 30,
+                                        "secureOutput": false,
+                                        "secureInput": false
+                                    },
+                                    "userProperties": [],
+                                    "typeProperties": {
+                                        "source": {
+                                            "type": "SqlServerSource",
+                                            "sqlReaderQuery": {
+                                                "value": "@{concat('SELECT * FROM ', item().SchemaName, '.', item().TableName)}",
+                                                "type": "Expression"
+                                            },
+                                            "queryTimeout": "02:00:00",
+                                            "partitionOption": "None"
+                                        },
+                                        "sink": {
+                                            "type": "ParquetSink",
+                                            "storeSettings": {
+                                                "type": "AzureBlobFSWriteSettings"
+                                            },
+                                            "formatSettings": {
+                                                "type": "ParquetWriteSettings"
+                                            }
+                                        },
+                                        "enableStaging": false,
+                                        "translator": {
+                                            "type": "TabularTranslator",
+                                            "typeConversion": true,
+                                            "typeConversionSettings": {
+                                                "allowDataTruncation": true,
+                                                "treatBooleanAsNumber": false
+                                            }
+                                        }
+                                    },
+                                    "inputs": [
+                                        {
+                                            "referenceName": "SqlDBTables",
+                                            "type": "DatasetReference",
+                                            "parameters": {}
+                                        }
+                                    ],
+                                    "outputs": [
+                                        {
+                                            "referenceName": "parquetTables",
+                                            "type": "DatasetReference",
+                                            "parameters": {
+                                                "schemaname": {
+                                                    "value": "@item().SchemaName",
+                                                    "type": "Expression"
+                                                },
+                                                "tablename": {
+                                                    "value": "@item().TableName",
+                                                    "type": "Expression"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "Bronze to Silver",
+                        "type": "SynapseNotebook",
+                        "dependsOn": [
+                            {
+                                "activity": "ForEach Schema Table",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "0.12:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "notebook": {
+                                "referenceName": "bronze-to-silver",
+                                "type": "NotebookReference"
+                            },
+                            "snapshot": true,
+                            "conf": {}
+                        }
+                    }
+                ],
+                "policy": {
+                    "elapsedTimeMetric": {}
+                },
+                "annotations": [],
+                "lastPublishTime": "2024-05-29T09:17:45Z"
+            },
+            "dependsOn": [
+                "[concat(variables('workspaceId'), '/datasets/SqlDBTables')]",
+                "[concat(variables('workspaceId'), '/notebooks/bronze-to-silver')]",
+                "[concat(variables('workspaceId'), '/datasets/parquetTables')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('workspaceName'), '/SqlDBTables')]",
+            "type": "Microsoft.Synapse/workspaces/datasets",
+            "apiVersion": "2019-06-01-preview",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "FreeAzureAdventureWorksSqlServer1",
+                    "type": "LinkedServiceReference"
+                },
+                "annotations": [],
+                "type": "SqlServerTable",
+                "schema": [],
+                "typeProperties": {}
+            },
+            "dependsOn": [
+                "[concat(variables('workspaceId'), '/linkedServices/FreeAzureAdventureWorksSqlServer1')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('workspaceName'), '/bronze-to-silver')]",
+            "type": "Microsoft.Synapse/workspaces/notebooks",
+            "apiVersion": "2019-06-01-preview",
+            "properties": {
+                "nbformat": 4,
+                "nbformat_minor": 2,
+                "sessionProperties": {
+                    "driverMemory": "28g",
+                    "driverCores": 4,
+                    "executorMemory": "28g",
+                    "executorCores": 4,
+                    "numExecutors": 2,
+                    "conf": {
+                        "spark.dynamicAllocation.enabled": "false",
+                        "spark.dynamicAllocation.minExecutors": "2",
+                        "spark.dynamicAllocation.maxExecutors": "2",
+                        "spark.autotune.trackingId": "a09b474f-43ff-40ca-a03b-b113db9e5e4e"
+                    }
+                },
+                "metadata": {
+                    "saveOutput": true,
+                    "enableDebugMode": false,
+                    "kernelspec": {
+                        "name": "synapse_pyspark",
+                        "display_name": "python"
+                    },
+                    "language_info": {
+                        "name": "python"
+                    },
+                    "sessionKeepAliveTimeout": 30
+                },
+                "cells": [
+                    {
+                        "cell_type": "code",
+                        "metadata": {},
+                        "source": [
+                            "print(\"Hello World\")"
+                        ],
+                        "outputs": [],
+                        "execution_count": null
+                    }
+                ]
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Synapse/workspaces', parameters('workspaceName'))]"
+            ]
         }
     ]
 }
