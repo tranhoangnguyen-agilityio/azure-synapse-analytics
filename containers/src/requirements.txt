@@ -1,0 +1,4 @@
+azure-mgmt-resource==23.1.1
+azure-identity==1.16.0
+azure-mgmt-synapse==2.0.0
+azure-synapse-artifacts==0.19.0

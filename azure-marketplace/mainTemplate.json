@@ -40,7 +40,7 @@
         "storageRoleAssignmentId": {
             "type": "String",
             "metadata": "UUID for storage account role assignment",
-            "defaultValue": "[newGuid()]"
+            "defaultValue": "26282d4d-092a-47b8-9497-bfa1efe9dea3"
         }
     },
     "variables": {
@@ -50,10 +50,11 @@
         "FreeAzureAdventureWorksSqlServer1_connectionString": "[format('Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source={0};Initial Catalog={1};User Id={2},Password={3}', parameters('dataSource_serverName'), parameters('dataSource_databaseName'), parameters('dataSource_userName'), parameters('dataSource_password'))]",
         "storageAccounts_collectiv2410_externalid": "[extensionResourceId(resourceGroup().Id , 'Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]",
         "vulnerabilityAssessments_Default_storageContainerPath": "[format('https://{0}.dfs.core.windows.net/{1}', parameters('storageAccountName'), parameters('vulnerabilityAssessmentContainer'), '/')]",
+        "databaseName": "[format('{0}-gold-db', parameters('workspaceName'))]",
+        "containerIdentityName": "containerIdentity",
         "Owner": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635')]",
         "Contributor": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
         "Reader": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')]"
-
     },
     "resources": [
         {
@@ -386,6 +387,96 @@
                 "roleDefinitionId": "[variables('Contributor')]",
                 "principalId": "[reference(resourceId('Microsoft.Synapse/workspaces', parameters('workspaceName')), '2021-06-01', 'Full').identity.principalId]"
             }
+        },
+        {
+            "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+            "apiVersion": "2023-07-31-preview",
+            "name": "[variables('containerIdentityName')]",
+            "location": "[parameters('location')]"
+        },
+        {
+            "type": "Microsoft.ContainerInstance/containerGroups",
+            "apiVersion": "2023-05-01",
+            "name": "[concat(parameters('workspaceName'),'-aci')]",
+            "location": "[parameters('location')]",
+            "identity": {
+                "type": "UserAssigned",
+                "userAssignedIdentities": {
+                    "[extensionResourceId(resourceGroup().Id , 'Microsoft.ManagedIdentity/userAssignedIdentities', variables('containerIdentityName'))]": {}
+                }
+            },
+            "properties": {
+                "containers": [
+                    {
+                        "name": "[concat(parameters('workspaceName'),'create-resource-aci')]",
+                        "properties": {
+                            "command": [
+                                "python",
+                                "src/script.py"
+                            ],
+                            "environmentVariables": [
+                                {
+                                    "name": "AZURE_SUBSCRIPTION_ID",
+                                    "value": "efdd28a3-55e6-4711-a58b-ab398c259094"
+                                },
+                                {
+                                    "name": "DATA_SOURCE",
+                                    "value": "localworkspace-ondemand.sql.azuresynapse.net"
+                                },
+                                {
+                                    "name": "INIT_DATABASE_NAME",
+                                    "value": "localworkspace-gold-db"
+                                },
+                                {
+                                    "name": "SYNAPSE_WORKSPACE_NAME",
+                                    "value": "[parameters('workspaceName')]"
+                                },
+                                {
+                                    "name": "SYNAPSE_WORKSPACE_ENDPOINT",
+                                    "value": "https://localworkspace.dev.azuresynapse.net"
+                                },
+                                {
+                                    "name": "SYNAPSE_DATASOURCE",
+                                    "value": "localworkspace-ondemand.sql.azuresynapse.net"
+                                },
+                                {
+                                    "name": "SYNAPSE_DATABASE_NAME",
+                                    "value": "localworkspace-gold-db"
+                                },
+                                {
+                                    "name": "SOURCE_DATA_SOURCE",
+                                    "value": "sqlservercentralpublic.database.windows.net"
+                                },
+                                {
+                                    "name": "SOURCE_DATABASE_NAME",
+                                    "value": "AdventureWorks"
+                                },
+                                {
+                                    "name": "SOURCE_DATABASE_USER_NAME",
+                                    "value": "sqlfamily"
+                                },
+                                {
+                                    "name": "SOURCE_DATABASE_PASSWORD",
+                                    "value": ""
+                                }
+                            ],
+                            "image": "tranhoang/azure-marketplace",
+                            "resources": {
+                                "requests": {
+                                    "cpu": 1,
+                                    "memoryInGB": 1
+                                }
+                            }
+                        }
+                    }
+                ],
+                "osType": "Linux",
+                "restartPolicy": "Never"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('containerIdentityName'))]",
+                "[concat(variables('workspaceId'), '/integrationruntimes', '/AutoResolveIntegrationRuntime')]"
+            ]
         }
     ]
 }
