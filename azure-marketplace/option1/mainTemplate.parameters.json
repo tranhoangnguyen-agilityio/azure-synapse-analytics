@@ -11,12 +11,6 @@
         "storageAccountName": {
             "value": "localcollectiv"
         },
-        "collectiv-WorkspaceDefaultSqlServer_connectionString": {
-            "value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:localworkspace.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
-        },
-        "serverlessSQLdb_connectionString": {
-            "value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=localworkspace-ondemand.sql.azuresynapse.net;Initial Catalog=localworkspace-gold-db"
-        },
         "dataSource_serverName": {
             "value": "sqlservercentralpublic.database.windows.net"
         },
@@ -24,10 +18,28 @@
             "value": "sqlfamily"
         },
         "dataSource_password": {
-            "value": "sqlf@m1ly"
+            "value": "TBD"
         },
         "dataSource_databaseName": {
             "value": "AdventureWorks"
+        },
+        "storageRoleAssignmentId": {
+            "value": "26282d4d-092a-47b8-9497-bfa1efe9dea3"
+        },
+        "containerIdentityName": {
+            "value": "containerIdentity"
+        },
+        "containerIdentityRoleAssignmentId": {
+            "value": "0e83794e-aa60-4a24-9018-4a07d706eff3"
+        },
+        "vulnerabilityAssessmentContainer": {
+            "value": "vascans"
+        },
+        "managedResourceGroupNameSuffix": {
+            "value": "4b93015f-bce7-48e1-942d-9f8fb9a4912a"
+        },
+        "initialWorkspaceAdminObjectId": {
+            "value": "e7f32d66-8cf3-4609-a6b6-6105765a8ee8"
         }
     }
 }

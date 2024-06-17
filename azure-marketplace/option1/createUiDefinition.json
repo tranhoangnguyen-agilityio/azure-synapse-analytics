@@ -8,9 +8,35 @@
         ],
         "steps": [
             {
+                "name": "jitConfiguration",
+                "label": "JIT Configuration",
+                "subLabel": {
+                    "preValidation": "Configure JIT settings for your application",
+                    "postValidation": "Done"
+                },
+                "bladeTitle": "JIT Configuration",
+                "elements": [
+                    {
+                      "name": "jitConfigurationControl",
+                      "type": "Microsoft.Solutions.JitConfigurator",
+                      "label": "JIT Configuration"
+                    }
+                ]
+            },
+            {
                 "name": "dataSourceSetting",
                 "label": "SQL Server Data source setting",
                 "elements": [
+                    {
+                        "name": "infoBox1",
+                        "type": "Microsoft.Common.InfoBox",
+                        "visible": true,
+                        "options": {
+                            "icon": "None",
+                            "text": "0.0.6",
+                            "uri": "https://www.microsoft.com"
+                        }
+                    },
                     {
                         "name": "serverName",
                         "type": "Microsoft.Common.TextBox",
@@ -55,7 +81,6 @@
                         },
                         "visible": true
                     }
-
                 ]
             },
             {
@@ -107,13 +132,12 @@
         "outputs": {
             "location": "[location()]",
             "workspaceName": "[steps('synapseSetting').workspaceName]",
-            "collectiv-WorkspaceDefaultSqlServer_connectionString": "[concat('Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:', steps('synapseSetting').workspaceName, '.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}')]",
-            "serverlessSQLdb_connectionString": "[concat('Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=', steps('synapseSetting').workspaceName, '-ondemand.sql.azuresynapse.net;Initial Catalog=', steps('synapseSetting').workspaceName, '-gold-db')]",
+            "storageAccountName": "[concat(steps('synapseSetting').storageAccounts.prefix, '1')]",
             "dataSource_serverName": "[steps('dataSourceSetting').serverName]",
             "dataSource_userName": "[steps('dataSourceSetting').userName]",
             "dataSource_password": "[steps('dataSourceSetting').password]",
             "dataSource_databaseName": "[steps('dataSourceSetting').databaseName]",
-            "storageAccountName": "[concat('https://', steps('synapseSetting').storageAccounts.prefix, '1' ,'.dfs.core.windows.net')]"
-        }
+            "jitAccessPolicy": "[steps('jitConfiguration').jitConfigurationControl]"
+		}
     }
 }
