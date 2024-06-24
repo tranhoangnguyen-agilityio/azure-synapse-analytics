@@ -207,27 +207,37 @@ def sleep(message: str):
         time.sleep(10) # Makes Python wait for 10 seconds
     print('Finished waiting.')
 
+def updateGitConfig():
+    az synapse workspace update --name localworkspace \
+    --resource-group local-deployment \
+    --account-name tranhoangnguyen-agilityio \
+    --repository-name azure-marketplace-synapse-tenant \
+    --collaboration-branch synapse-main \
+    --repository-type GitHub
+    
 
-synapse_workspace_name = os.environ["SYNAPSE_WORKSPACE_NAME"] 
-synapse_workspace_endpoint = os.environ["SYNAPSE_WORKSPACE_ENDPOINT"] 
-subscription_id = os.environ["AZURE_SUBSCRIPTION_ID"]
-data_source = os.environ["SYNAPSE_DATASOURCE"]
-database_name = os.environ["SYNAPSE_DATABASE_NAME"]
+# synapse_workspace_name = os.environ["SYNAPSE_WORKSPACE_NAME"] 
+# synapse_workspace_endpoint = os.environ["SYNAPSE_WORKSPACE_ENDPOINT"] 
+# subscription_id = os.environ["AZURE_SUBSCRIPTION_ID"]
+# data_source = os.environ["SYNAPSE_DATASOURCE"]
+# database_name = os.environ["SYNAPSE_DATABASE_NAME"]
 
-source_data_source = os.environ["SOURCE_DATA_SOURCE"]
-source_database_name = os.environ["SOURCE_DATABASE_NAME"]
-source_db_user_name = os.environ["SOURCE_DATABASE_USER_NAME"]
-source_db_password = os.environ["SOURCE_DATABASE_PASSWORD"]
+# source_data_source = os.environ["SOURCE_DATA_SOURCE"]
+# source_database_name = os.environ["SOURCE_DATABASE_NAME"]
+# source_db_user_name = os.environ["SOURCE_DATABASE_USER_NAME"]
+# source_db_password = os.environ["SOURCE_DATABASE_PASSWORD"]
 
-container_identity_principal_id = os.environ["CONTAINER_IDENITY_PRINCIPAL_ID"]
+# container_identity_principal_id = os.environ["CONTAINER_IDENITY_PRINCIPAL_ID"]
 
-assign_synapse_studio_role(workspace_name=synapse_workspace_name, synapse_workspace_endpoint=synapse_workspace_endpoint, container_identity_principal_id=container_identity_principal_id)
-sleep('Waiting for the new role assignment got affected.')
-create_serverless_database_link_service(synapse_workspace_endpoint, data_source, database_name)
-create_sql_server_database_link_service(synapse_workspace_endpoint, source_data_source, source_database_name, source_db_user_name, source_db_password)
-create_gold_table_dataset(workspace_name=synapse_workspace_name, synapse_workspace_endpoint=synapse_workspace_endpoint)
-create_parquet_dataset(workspace_name=synapse_workspace_name, synapse_workspace_endpoint=synapse_workspace_endpoint)
-create_sql_server_dataset(synapse_workspace_endpoint=synapse_workspace_endpoint)
-create_note_books(workspace_name=synapse_workspace_name, container_identity_principal_id=container_identity_principal_id)
-create_pipeline_create_view(synapse_workspace_endpoint=synapse_workspace_endpoint)
-create_pipeline_copy_all_tables(synapse_workspace_endpoint=synapse_workspace_endpoint)
+# assign_synapse_studio_role(workspace_name=synapse_workspace_name, synapse_workspace_endpoint=synapse_workspace_endpoint, container_identity_principal_id=container_identity_principal_id)
+# sleep('Waiting for the new role assignment got affected.')
+# create_serverless_database_link_service(synapse_workspace_endpoint, data_source, database_name)
+# create_sql_server_database_link_service(synapse_workspace_endpoint, source_data_source, source_database_name, source_db_user_name, source_db_password)
+# create_gold_table_dataset(workspace_name=synapse_workspace_name, synapse_workspace_endpoint=synapse_workspace_endpoint)
+# create_parquet_dataset(workspace_name=synapse_workspace_name, synapse_workspace_endpoint=synapse_workspace_endpoint)
+# create_sql_server_dataset(synapse_workspace_endpoint=synapse_workspace_endpoint)
+# create_note_books(workspace_name=synapse_workspace_name, container_identity_principal_id=container_identity_principal_id)
+# create_pipeline_create_view(synapse_workspace_endpoint=synapse_workspace_endpoint)
+# create_pipeline_copy_all_tables(synapse_workspace_endpoint=synapse_workspace_endpoint)
+
+

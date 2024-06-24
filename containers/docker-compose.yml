@@ -1,10 +1,10 @@
 version: '3.8'
 services:
   validateTemplate:
-    image: azure-marketplace:latest
+    image: tranhoang/azure-marketplace:latest
     restart: "no"
-    command: python src/script.py
+    command: ./option2/bin/deploy.sh
     volumes:
-      - ./src:/usr/src/app/src
+      - ./deploykey:/usr/src/app/deploykey
     environment:
       - AZURE_SUBSCRIPTION_ID=efdd28a3-55e6-4711-a58b-ab398c259094

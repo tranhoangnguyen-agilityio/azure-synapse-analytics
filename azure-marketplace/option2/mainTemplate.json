@@ -12,6 +12,22 @@
         "storageAccountName": {
             "type": "String"
         },
+        "gitHubAccount": {
+            "type": "String",
+            "metadata": "Synapse github account"
+        },
+        "repositoryName": {
+            "type": "String",
+            "metadata": "Synapse github repository name"
+        },
+        "collaborationBranch": {
+            "type": "String",
+            "metadata": "Synapse github collaboration branch"
+        },
+        "publishBranch": {
+            "type": "String",
+            "metadata": "Synapse github publish branch"
+        },
         "dataSource_serverName": {
             "type": "String"
         },
@@ -266,7 +282,14 @@
                     "initialWorkspaceAdminObjectId": "[parameters('initialWorkspaceAdminObjectId')]"
                 },
                 "azureADOnlyAuthentication": false,
-                "trustedServiceBypassEnabled": false
+                "trustedServiceBypassEnabled": false,
+                "workspaceRepositoryConfiguration": {
+                    "accountName": "[parameters('gitHubAccount')]",
+                    "collaborationBranch": "[parameters('collaborationBranch')]",
+                    "repositoryName": "[parameters('repositoryName')]",
+                    "rootFolder": "/",
+                    "type": "WorkspaceGitHubConfiguration"
+                  }
             },
             "dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
@@ -410,85 +433,6 @@
             "dependsOn": [
                 "[resourceId('Microsoft.Synapse/workspaces', parameters('workspaceName'))]",
                 "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('containerIdentityName'))]"
-            ]
-        },
-        {
-            "type": "Microsoft.ContainerInstance/containerGroups",
-            "apiVersion": "2023-05-01",
-            "name": "[concat(parameters('workspaceName'),'-aci')]",
-            "location": "[parameters('location')]",
-            "identity": {
-                "type": "UserAssigned",
-                "userAssignedIdentities": {
-                    "[extensionResourceId(resourceGroup().Id , 'Microsoft.ManagedIdentity/userAssignedIdentities', parameters('containerIdentityName'))]": {}
-                }
-            },
-            "properties": {
-                "containers": [
-                    {
-                        "name": "[concat(parameters('workspaceName'),'create-resource-aci')]",
-                        "properties": {
-                            "command": [
-                                "python",
-                                "option1/src/script.py"
-                            ],
-                            "environmentVariables": [
-                                {
-                                    "name": "AZURE_SUBSCRIPTION_ID",
-                                    "value": "[subscription().subscriptionId]"
-                                },
-                                {
-                                    "name": "SYNAPSE_WORKSPACE_NAME",
-                                    "value": "[parameters('workspaceName')]"
-                                },
-                                {
-                                    "name": "SYNAPSE_WORKSPACE_ENDPOINT",
-                                    "value": "[reference(resourceId('Microsoft.Synapse/workspaces', parameters('workspaceName')), '2021-06-01', 'Full').properties.connectivityEndpoints.dev]"
-                                },
-                                {
-                                    "name": "SYNAPSE_DATASOURCE",
-                                    "value": "[reference(resourceId('Microsoft.Synapse/workspaces', parameters('workspaceName')), '2021-06-01', 'Full').properties.connectivityEndpoints.sqlOnDemand]"
-                                },
-                                {
-                                    "name": "SYNAPSE_DATABASE_NAME",
-                                    "value": "[concat(parameters('workspaceName'), '-gold-db')]"
-                                },
-                                {
-                                    "name": "SOURCE_DATA_SOURCE",
-                                    "value": "[parameters('dataSource_serverName')]"
-                                },
-                                {
-                                    "name": "SOURCE_DATABASE_NAME",
-                                    "value": "[parameters('dataSource_databaseName')]"
-                                },
-                                {
-                                    "name": "SOURCE_DATABASE_USER_NAME",
-                                    "value": "[parameters('dataSource_userName')]"
-                                },
-                                {
-                                    "name": "SOURCE_DATABASE_PASSWORD",
-                                    "value": "[parameters('dataSource_password')]"
-                                },
-                                {
-                                    "name": "CONTAINER_IDENITY_PRINCIPAL_ID",
-                                    "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('containerIdentityName')), '2023-07-31-preview', 'Full').properties.principalId]"
-                                }
-                            ],
-                            "image": "tranhoang/azure-marketplace",
-                            "resources": {
-                                "requests": {
-                                    "cpu": 1,
-                                    "memoryInGB": 1
-                                }
-                            }
-                        }
-                    }
-                ],
-                "osType": "Linux",
-                "restartPolicy": "Never"
-            },
-            "dependsOn": [
-                "[concat('Microsoft.Synapse/workspaces/', parameters('workspaceName') ,'/bigDataPools/collectivspark')]"
             ]
         }
     ]

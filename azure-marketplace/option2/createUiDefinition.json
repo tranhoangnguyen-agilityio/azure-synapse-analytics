@@ -1,0 +1,183 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+    "handler": "Microsoft.Azure.CreateUIDef",
+    "version": "0.1.2-preview",
+    "parameters": {
+        "basics": [
+            {}
+        ],
+        "steps": [
+            {
+                "name": "jitConfiguration",
+                "label": "JIT Configuration",
+                "subLabel": {
+                    "preValidation": "Configure JIT settings for your application",
+                    "postValidation": "Done"
+                },
+                "bladeTitle": "JIT Configuration",
+                "elements": [
+                    {
+                        "name": "jitConfigurationControl",
+                        "type": "Microsoft.Solutions.JitConfigurator",
+                        "label": "JIT Configuration"
+                    }
+                ]
+            },
+            {
+                "name": "dataSourceSetting",
+                "label": "SQL Server Data source setting",
+                "elements": [
+                    {
+                        "name": "infoBox1",
+                        "type": "Microsoft.Common.InfoBox",
+                        "visible": true,
+                        "options": {
+                            "icon": "None",
+                            "text": "0.0.6",
+                            "uri": "https://www.microsoft.com"
+                        }
+                    },
+                    {
+                        "name": "serverName",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Server name",
+                        "placeholder": "Server name",
+                        "defaultValue": "sqlservercentralpublic.database.windows.net",
+                        "constraints": {
+                            "required": true
+                        },
+                        "visible": true
+                    },
+                    {
+                        "name": "databaseName",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Database name",
+                        "placeholder": "Database name",
+                        "defaultValue": "AdventureWorks",
+                        "constraints": {
+                            "required": true
+                        },
+                        "visible": true
+                    },
+                    {
+                        "name": "userName",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "User name",
+                        "placeholder": "User name",
+                        "defaultValue": "sqlfamily",
+                        "constraints": {
+                            "required": true
+                        },
+                        "visible": true
+                    },
+                    {
+                        "name": "password",
+                        "type": "Microsoft.Common.PasswordBox",
+                        "options": {
+                            "hideConfirmation": true
+                        },
+                        "constraints": {
+                            "required": true
+                        },
+                        "visible": true
+                    }
+                ]
+            },
+            {
+                "name": "synapseSetting",
+                "label": "Synapse Workspace",
+                "bladeTitle": "Synapse credentials",
+                "subLabel": {
+                    "preValidation": "Provide Synapase's setting",
+                    "postValidation": "Great - let's move on!"
+                },
+                "elements": [
+                    {
+                        "name": "workspaceName",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Synapse workspace name",
+                        "placeholder": "Workspace name",
+                        "defaultValue": "",
+                        "toolTip": "Use only allowed characters",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^[a-z0-9A-Z]{1,30}$",
+                            "validationMessage": "Only alphanumeric characters are allowed, and the value must be 1-30 characters long."
+                        },
+                        "visible": true
+                    },
+                    {
+                        "name": "storageAccounts",
+                        "type": "Microsoft.Storage.MultiStorageAccountCombo",
+                        "label": {
+                            "prefix": "Storage account name prefix",
+                            "type": "Storage account type"
+                        },
+                        "defaultValue": {
+                            "prefix": "stracct",
+                            "type": "Standard_LRS"
+                        },
+                        "constraints": {
+                            "allowedTypes": [
+                                "Premium_LRS",
+                                "Standard_LRS",
+                                "Standard_GRS"
+                            ]
+                        },
+                        "count": 1
+                    },
+                    {
+                        "name": "gitHubAccount",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "GitHub account",
+                        "placeholder": "GitHub account",
+                        "defaultValue": "",
+                        "toolTip": "GitHub account for synapse",
+                        "visible": true
+                    },
+                    {
+                        "name": "repositoryName",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Repository name",
+                        "placeholder": "Repository name",
+                        "defaultValue": "",
+                        "toolTip": "",
+                        "visible": true
+                    },
+                    {
+                        "name": "collaborationBranch",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Collaboration branch",
+                        "placeholder": "Collaboration branch",
+                        "defaultValue": "",
+                        "toolTip": "",
+                        "visible": true
+                    },
+                    {
+                        "name": "publishBranch",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Publish branch",
+                        "placeholder": "Publish branch",
+                        "defaultValue": "",
+                        "toolTip": "",
+                        "visible": true
+                    }
+                ]
+            }
+        ],
+        "outputs": {
+            "location": "[location()]",
+            "workspaceName": "[steps('synapseSetting').workspaceName]",
+            "storageAccountName": "[concat(steps('synapseSetting').storageAccounts.prefix, '1')]",
+            "gitHubAccount": "[steps('synapseSetting').gitHubAccount]",
+            "repositoryName": "[steps('synapseSetting').repositoryName]",
+            "collaborationBranch": "[steps('synapseSetting').collaborationBranch]",
+            "publishBranch": "[steps('synapseSetting').publishBranch]",
+            "dataSource_serverName": "[steps('dataSourceSetting').serverName]",
+            "dataSource_userName": "[steps('dataSourceSetting').userName]",
+            "dataSource_password": "[steps('dataSourceSetting').password]",
+            "dataSource_databaseName": "[steps('dataSourceSetting').databaseName]",
+            "jitAccessPolicy": "[steps('jitConfiguration').jitConfigurationControl]"
+        }
+    }
+}

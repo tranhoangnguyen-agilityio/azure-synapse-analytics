@@ -1,0 +1,13 @@
+{
+	"name": "FreeAzureAdventureWorksSqlServer1",
+	"type": "Microsoft.Synapse/workspaces/linkedservices",
+	"properties": {
+		"description": "Link to free Azure Adventure Works",
+		"annotations": [],
+		"type": "SqlServer",
+		"typeProperties": {
+			"connectionString": "integrated security=False;data source=sqlservercentralpublic.database.windows.net;initial catalog=AdventureWorks;user id=sqlfamily",
+			"encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIlNZTkFQU0VANjJDOTIxMDAtNjk3Qi00NEI1LUI5RDItMkIwQjQ4OThERDQxXzBhMWNlZDg2LTJmM2ItNDA1Yy1iY2MzLTczZTcxMDk4MjJhOSINCn0="
+		}
+	}
+}
