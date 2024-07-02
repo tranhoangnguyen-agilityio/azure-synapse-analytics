@@ -20,8 +20,20 @@
         "collaborationBranch": {
             "value": "synapse-marketplace-test"
         },
-        "publishBranch": {
-            "value": "synapse-publish"
+        "gitCommitEmail": {
+            "value": "tran.hoangnguyen@asnet.com.vn"
+        },
+        "gitCommitName": {
+            "value": "Tran Hoang"
+        },
+        "azureKeyVaultResourceGroup": {
+            "value": "local-deployment"
+        },
+        "azureKeyVault":{
+            "value": "tenant-github-deploykey"
+        },
+        "azureSecretName":{
+            "value": "deploykey"
         },
         "dataSource_serverName": {
             "value": "sqlservercentralpublic.database.windows.net"
@@ -41,8 +53,11 @@
         "containerIdentityName": {
             "value": "containerIdentity"
         },
-        "containerIdentityRoleAssignmentId": {
+        "containerIdentityRoleAssignmentId1": {
             "value": "0e83794e-aa60-4a24-9018-4a07d706eff3"
+        },
+        "containerIdentityRoleAssignmentId2": {
+            "value": "48c1a696-978c-4c93-b54c-fc0b0c7172ec"
         },
         "vulnerabilityAssessmentContainer": {
             "value": "vascans"

@@ -1,0 +1,143 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "type": "String"
+        },
+        "workspaceName": {
+            "type": "String",
+            "metadata": "Synapse workspace name"
+        },
+        "storageAccountName": {
+            "type": "String"
+        },
+        "gitHubAccount": {
+            "type": "String",
+            "metadata": "Synapse github account"
+        },
+        "repositoryName": {
+            "type": "String",
+            "metadata": "Synapse github repository name"
+        },
+        "collaborationBranch": {
+            "type": "String",
+            "metadata": "Synapse github collaboration branch"
+        },
+        "gitCommitEmail": {
+            "type": "String",
+            "metadata": "Email that system use to commit to tennant repository"
+        },
+        "gitCommitName": {
+            "type": "String",
+            "metadata": "Username that system use to commit to tennant repository"
+        },
+        "azureKeyVaultResourceGroup": {
+            "type": "String",
+            "metadata": "Resource group contains thse azureKeyVault."
+        },
+        "azureKeyVault": {
+            "type": "String",
+            "metadata": "The keyvault which contains the github secret deploykey"
+        },
+        "azureSecretName":{
+            "type": "String",
+            "metadata": "The github deploy secret key within the azureKeyVault"
+        },
+        "dataSource_serverName": {
+            "type": "String"
+        },
+        "dataSource_userName": {
+            "type": "String"
+        },
+        "dataSource_password": {
+            "type": "secureString"
+        },
+        "dataSource_databaseName": {
+            "type": "String"
+        },
+        "storageRoleAssignmentId": {
+            "type": "String",
+            "metadata": "UUID for storage account role assignment",
+            "defaultValue": "[newGuid()]"
+        },
+        "containerIdentityName": {
+            "type": "String",
+            "metadata": "The managed identity name for container group",
+            "defaultValue": "containerIdentityTest"
+        },
+        "containerIdentityRoleAssignmentId1": {
+            "type": "String",
+            "metadata": "The Role Assign Id when assign container Identity to workspace",
+            "defaultValue": "[newGuid()]"
+        },
+        "containerIdentityRoleAssignmentId2": {
+            "type": "String",
+            "metadata": "The Role Assign Id when assign container Identity to key vault",
+            "defaultValue": "[newGuid()]"
+        },
+        "vulnerabilityAssessmentContainer": {
+            "type": "String",
+            "metadata": "A blob storage container path to hold the scan results",
+            "defaultValue": "vascans"
+        },
+        "managedResourceGroupNameSuffix": {
+            "type": "String",
+            "metadata": "An UUID suffix for properties Microsoft.Synapse/workspaces - properties.managedResourceGroupName",
+            "defaultValue": "[newGuid()]"
+        },
+        "initialWorkspaceAdminObjectId": {
+            "type": "String",
+            "metadata": "An UUID Microsoft.Synapse/workspaces - initialWorkspaceAdminObjectId",
+            "defaultValue": "[newGuid()]"
+        }
+    },
+    "variables": {
+        "workspaceId": "[concat('Microsoft.Synapse/workspaces/', parameters('workspaceName'))]",
+        "workspacePrincipalId": "[extensionResourceId(resourceGroup().Id , 'Microsoft.Synapse/workspaces', parameters('workspaceName'))]",
+        "Owner": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635')]",
+        "Contributor": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
+        "Reader": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')]",
+        "StorageAccountContributor": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')]",
+        "KeyVaultSecretsUser": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', '4633458b-17de-408a-b874-0445c86b69e6')]",
+        "storageAccounts_collectiv2410_externalid": "[extensionResourceId(resourceGroup().Id , 'Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+            "apiVersion": "2023-07-31-preview",
+            "name": "[parameters('containerIdentityName')]",
+            "location": "[parameters('location')]"
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "name": "pid-db2da1e4-f0fd-4f31-b488-f2266a0084e9-partnercenter",
+            "apiVersion": "2024-03-01",
+            "resourceGroup": "[parameters('azureKeyVaultResourceGroup')]",
+            "subscriptionId": "[subscription().subscriptionId]",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                        {
+                            "type": "Microsoft.Authorization/roleAssignments",
+                            "apiVersion": "2022-04-01",
+                            "name": "[parameters('containerIdentityRoleAssignmentId2')]",
+                            "scope": "[concat('Microsoft.KeyVault/vaults', '/', parameters('azureKeyVault') )]",
+                            "properties": {
+                                "roleDefinitionId": "[variables('KeyVaultSecretsUser')]",
+                                "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('containerIdentityName')), '2023-01-31', 'Full').properties.principalId]",
+                                "principalType": "ServicePrincipal"
+                            }
+                        }
+                    ]
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('containerIdentityName'))]"
+            ]
+        }
+    ]
+}

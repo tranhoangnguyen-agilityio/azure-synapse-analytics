@@ -33,7 +33,7 @@
                         "visible": true,
                         "options": {
                             "icon": "None",
-                            "text": "0.0.6",
+                            "text": "0.0.10",
                             "uri": "https://www.microsoft.com"
                         }
                     },
@@ -92,6 +92,24 @@
                     "postValidation": "Great - let's move on!"
                 },
                 "elements": [
+                    {
+                        "name": "appIdentity",
+                        "type": "Microsoft.ManagedIdentity.IdentitySelector",
+                        "label": "Managed Identity Configuration",
+                        "toolTip": {
+                          "systemAssignedIdentity": "Enable system assigned identity to grant the managed application access to additional existing resources.",
+                          "userAssignedIdentity": "Add user assigned identities to grant the managed application access to additional existing resources."
+                        },
+                        "defaultValue": {
+                          "systemAssignedIdentity": "Off"
+                        },
+                        "options": {
+                          "hideSystemAssignedIdentity": false,
+                          "hideUserAssignedIdentity": false,
+                          "readOnlySystemAssignedIdentity": false
+                        },
+                        "visible": true
+                    },
                     {
                         "name": "workspaceName",
                         "type": "Microsoft.Common.TextBox",
@@ -153,15 +171,47 @@
                         "toolTip": "",
                         "visible": true
                     },
+					{
+						"name": "GithubDeployKey",
+						"type": "Microsoft.Common.Section",
+						"label": "Github DeployKey",
+						"elements": [
+                            {
+								"name": "azureKeyVaultResourceGroup",
+								"type": "Microsoft.Common.TextBox",
+								"label": "Key Vault Resource Group"
+							},
+							{
+								"name": "azureKeyVault",
+								"type": "Microsoft.Common.TextBox",
+								"label": "Key Vault"
+							},
+							{
+								"name": "azureSecretName",
+								"type": "Microsoft.Common.TextBox",
+								"label": "Secret Name"
+							}
+						],
+						"visible": true
+					},
                     {
-                        "name": "publishBranch",
-                        "type": "Microsoft.Common.TextBox",
-                        "label": "Publish branch",
-                        "placeholder": "Publish branch",
-                        "defaultValue": "",
-                        "toolTip": "",
-                        "visible": true
-                    }
+						"name": "GithubCommit",
+						"type": "Microsoft.Common.Section",
+						"label": "Github Commit",
+						"elements": [
+							{
+								"name": "gitCommitEmail",
+								"type": "Microsoft.Common.TextBox",
+								"label": "Commit Email"
+							},
+							{
+								"name": "gitCommitName",
+								"type": "Microsoft.Common.TextBox",
+								"label": "Commit UserName"
+							}
+						],
+						"visible": true
+					}
                 ]
             }
         ],
@@ -172,12 +222,17 @@
             "gitHubAccount": "[steps('synapseSetting').gitHubAccount]",
             "repositoryName": "[steps('synapseSetting').repositoryName]",
             "collaborationBranch": "[steps('synapseSetting').collaborationBranch]",
-            "publishBranch": "[steps('synapseSetting').publishBranch]",
+            "gitCommitEmail": "[steps('synapseSetting').GithubCommit.gitCommitEmail]",
+			"gitCommitName": "[steps('synapseSetting').GithubCommit.gitCommitName]",
+            "azureKeyVaultResourceGroup": "[steps('synapseSetting').GithubDeployKey.azureKeyVaultResourceGroup]",
+			"azureKeyVault": "[steps('synapseSetting').GithubDeployKey.azureKeyVault]",
+			"azureSecretName": "[steps('synapseSetting').GithubDeployKey.azureSecretName]",
             "dataSource_serverName": "[steps('dataSourceSetting').serverName]",
             "dataSource_userName": "[steps('dataSourceSetting').userName]",
             "dataSource_password": "[steps('dataSourceSetting').password]",
             "dataSource_databaseName": "[steps('dataSourceSetting').databaseName]",
-            "jitAccessPolicy": "[steps('jitConfiguration').jitConfigurationControl]"
+            "jitAccessPolicy": "[steps('jitConfiguration').jitConfigurationControl]",
+            "managedIdentity": "[steps('synapseSetting').appIdentity]"
         }
     }
 }
