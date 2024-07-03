@@ -2,7 +2,7 @@
 
 ```bash
 az deployment group create \
-  --name DebugDeployment1 \
+  --name DebugDeployment5 \
   --resource-group local-deployment \
   --template-file template.json
 ```

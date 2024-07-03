@@ -7,8 +7,8 @@ This docker image will execute during the Azure MarketPlace deployment to setup 
 ## Build and push Docker Image
 
 ``` bash
-docker build . -t tranhoang/azure-marketplace:latest
-docker push tranhoang/azure-marketplace:latest
+docker build . -t tranhoangnguyen/azure-marketplace:latest
+docker push tranhoangnguyen/azure-marketplace:latest
 ```
 
 ``` bash
@@ -29,14 +29,32 @@ az container attach --resource-group local-deployment --name localworkspace-aci
 ``` bash
 RESOURCE_ID=/subscriptions/efdd28a3-55e6-4711-a58b-ab398c259094/resourcegroups/local-deployment/providers/Microsoft.ManagedIdentity/userAssignedIdentities/containerIdentity
 
+
+
 az container create \
     --resource-group local-deployment \
     --name test-image \
-    --image tranhoang/azure-marketplace:latest \
+    --image tranhoangnguyen/azure-marketplace:latest \
     --restart-policy Never \
     --environment-variables AZURE_SUBSCRIPTION_ID=efdd28a3-55e6-4711-a58b-ab398c259094 DATA_SOURCE=localworkspace-ondemand.sql.azuresynapse.net INIT_DATABASE_NAME=localworkspace-gold-db SYNAPSE_WORKSPACE_ENDPOINT=https://localworkspace.dev.azuresynapse.net SYNAPSE_DATASOURCE=localworkspace-ondemand.sql.azuresynapse.net SYNAPSE_DATABASE_NAME=localworkspace-gold-db SOURCE_DATA_SOURCE=sqlservercentralpublic.database.windows.net SOURCE_DATABASE_NAME=AdventureWorks SOURCE_DATABASE_USER_NAME=sqlfamily SOURCE_DATABASE_PASSWORD=TBD SYNAPSE_WORKSPACE_NAME=localworkspace CONTAINER_IDENITY_PRINCIPAL_ID=4ef37297-5c83-40ff-8df3-2a8807b3fde5 \
     --assign-identity $RESOURCE_ID \
     --command-line "python src/script.py"
+
+RESOURCE_ID=/subscriptions/efdd28a3-55e6-4711-a58b-ab398c259094/resourcegroups/local-deployment/providers/Microsoft.ManagedIdentity/userAssignedIdentities/containerTestIdentity
+az container create \
+    --resource-group local-deployment \
+    --name test-image \
+    --image tranhoangnguyen/azure-marketplace:latest \
+    --restart-policy Never \
+    --environment-variables AZURE_SUBSCRIPTION_ID=efdd28a3-55e6-4711-a58b-ab398c259094 \DATA_SOURCE=localworkspace-ondemand.sql.azuresynapse.net INIT_DATABASE_NAME=localworkspace-gold-db SYNAPSE_WORKSPACE_ENDPOINT=https://localworkspace.dev.azuresynapse.net SYNAPSE_DATASOURCE=localworkspace-ondemand.sql.azuresynapse.net SYNAPSE_DATABASE_NAME=localworkspace-gold-db SOURCE_DATA_SOURCE=sqlservercentralpublic.database.windows.net SOURCE_DATABASE_NAME=AdventureWorks SOURCE_DATABASE_USER_NAME=sqlfamily SOURCE_DATABASE_PASSWORD=TBD SYNAPSE_WORKSPACE_NAME=localworkspace CONTAINER_IDENITY_PRINCIPAL_ID=b9c2debc-f626-4ad3-8d60-c209cddcda34 \
+    SYNAPSE_GIT_REPO=git@github.com:tranhoangnguyen-agilityio/azure-marketplace-synapse-tenant.git \
+    GITHUB_ACCOUNT=tranhoangnguyen-agilityio \
+    REPOSITORY_NAME=azure-marketplace-synapse-tenant \
+    COLLABORATION_BRANCH=synapse-marketplace-test \
+    AZURE_KEY_VAULT=tenant-github-deploykey \
+    AZURE_SECRET_NAME=deploykey \
+    --assign-identity $RESOURCE_ID \
+    --command-line "./option2/bin/deploy.sh"
 ```
 
 ## References

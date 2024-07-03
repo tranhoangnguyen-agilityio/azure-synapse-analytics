@@ -9,7 +9,8 @@
 echo GITHUB_ACCOUNT=$GITHUB_ACCOUNT
 echo REPOSITORY_NAME=$REPOSITORY_NAME
 echo COLLABORATION_BRANCH=$COLLABORATION_BRANCH
-echo SYNAPSE_GIT_REPO=$SYNAPSE_GIT_REPO
+echo GIT_COMMIT_EMAIL=$GIT_COMMIT_EMAIL
+echo GIT_COMMIT_NAME=$GIT_COMMIT_NAME
 echo AZURE_KEY_VAULT=$AZURE_KEY_VAULT
 echo AZURE_SECRET_NAME=$AZURE_SECRET_NAME
 echo CONTAINER_IDENITY_PRINCIPAL_ID=$CONTAINER_IDENITY_PRINCIPAL_ID
@@ -29,8 +30,8 @@ ls
 
 # Init git
 git init
-git config user.email "tran.hoangnguyen@asnet.com.vn"
-git config user.name "Tran Hoang"
+git config user.email "'$GIT_COMMIT_EMAIL'"
+git config user.name "'$GIT_COMMIT_NAME'"
 git remote add upstream $SYNAPSE_GIT_REPO
 
 # Commit

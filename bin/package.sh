@@ -1,1 +1,0 @@
-zip -j  packages/arm-deployment.zip azure-marketplace/createUiDefinition.json azure-marketplace/mainTemplate.json
